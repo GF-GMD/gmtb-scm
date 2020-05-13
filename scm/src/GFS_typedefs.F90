@@ -192,6 +192,7 @@ module GFS_typedefs
     real (kind=kind_phys), pointer :: spec_lh_flux (:) => null() !< specified kinematic surface latent heat flux
 
     !-- In/Out
+    real (kind=kind_phys), pointer :: conv_act(:)  => null()  !< convective activity conter hli 09/2017
     real (kind=kind_phys), pointer :: hice   (:)   => null()  !< sea ice thickness
     real (kind=kind_phys), pointer :: weasd  (:)   => null()  !< water equiv of accumulated snow depth (kg/m**2)
                                                               !< over land and sea ice
@@ -803,6 +804,13 @@ module GFS_typedefs
     real (kind=kind_phys), pointer :: htswc(:,:)       => null()  !<
     real (kind=kind_phys), pointer :: htsw0(:,:)       => null()  !<
 
+    !--- dynamical forcing variables for Grell-Freitas convection
+    real (kind=kind_phys), pointer :: forcet (:,:)     => null()  !<
+    real (kind=kind_phys), pointer :: forceq (:,:)     => null()  !<
+    real (kind=kind_phys), pointer :: prevst (:,:)     => null()  !<
+    real (kind=kind_phys), pointer :: prevsq (:,:)     => null()  !<
+    integer,               pointer :: cactiv   (:)     => null()  !< convective activity memory contour
+
     contains
       procedure :: create  => tbd_create  !<   allocate array data
   end type GFS_tbd_type
@@ -1353,6 +1361,7 @@ module GFS_typedefs
     Sfcprop%spec_lh_flux = clear_val
 
     !--- In/Out
+    allocate (Sfcprop%conv_act(IM))
     allocate (Sfcprop%hice   (IM))
     allocate (Sfcprop%weasd  (IM))
     allocate (Sfcprop%sncovr (IM))
@@ -1378,6 +1387,7 @@ module GFS_typedefs
     Sfcprop%slc    = clear_val
     Sfcprop%smc    = clear_val
     Sfcprop%stc    = clear_val
+    Sfcprop%conv_act = zero
 
     !--- Out
     allocate (Sfcprop%t2m (IM))
@@ -3036,6 +3046,17 @@ module GFS_typedefs
     Tbd%htlw0 = clear_val
     Tbd%htswc = clear_val
     Tbd%htsw0 = clear_val
+
+    allocate(Tbd%forcet(IM, Model%levs))
+    allocate(Tbd%forceq(IM, Model%levs))
+    allocate(Tbd%prevst(IM, Model%levs))
+    allocate(Tbd%prevsq(IM, Model%levs))
+    allocate(Tbd%cactiv(IM))
+    Tbd%forcet = clear_val
+    Tbd%forceq = clear_val
+    Tbd%prevst = clear_val
+    Tbd%prevsq = clear_val
+    Tbd%cactiv = zero
 
   end subroutine tbd_create
 
